@@ -66,6 +66,7 @@ default_app = firebase_admin.initialize_app(cred_object, {
 	'databaseURL': 'https://learningbuddies-f71a2-default-rtdb.asia-southeast1.firebasedatabase.app/'
 	})
 
+from firebase_admin import db
 
 
 #To add to database
