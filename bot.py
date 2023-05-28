@@ -57,6 +57,17 @@ bot = telebot.TeleBot("6233481401:AAHrhtvZ9ivUdCS-jjiq2f6IeSusyg7ZKPI")
 # logger = telebot.logger
 # telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
+#link to firestore
+import firebase_admin
+
+
+cred_object = firebase_admin.credentials.Certificate('~/Downloads/learningbuddies-f71a2-b475d9c8d067.json')
+default_app = firebase_admin.initialize_app(cred_object, {
+	'databaseURL': 'https://learningbuddies-f71a2-default-rtdb.asia-southeast1.firebasedatabase.app/'
+	})
+
+
+
 #To add to database
 users = {}
 num_users = 0
