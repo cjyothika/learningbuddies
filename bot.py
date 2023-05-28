@@ -10,6 +10,14 @@ logging.basicConfig(
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
 
+async def set_learning_goal(update: Update, context:ContextTypes.DEFAULT_TYPE):
+    #To implement
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="What are your learning goals?")
+
+async def match(update: Update, context:ContextTypes.DEFAULT_TYPE):
+    #To implement
+    await context.bot.send_message(chat_id=update.effective_chat.id)
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token('6233481401:AAHrhtvZ9ivUdCS-jjiq2f6IeSusyg7ZKPI').build()
     
