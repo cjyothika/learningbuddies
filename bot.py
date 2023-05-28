@@ -22,7 +22,11 @@ if __name__ == '__main__':
     application = ApplicationBuilder().token('6233481401:AAHrhtvZ9ivUdCS-jjiq2f6IeSusyg7ZKPI').build()
     
     start_handler = CommandHandler('start', start)
+    set_learning_goals_handler = CommandHandler('setgoals', set_learning_goal)
+    match_handler = CommandHandler('match', match)
     application.add_handler(start_handler)
+    application.add_handler(set_learning_goals_handler)
+    application.add_handler(match_handler)
     
     application.run_polling()
 
