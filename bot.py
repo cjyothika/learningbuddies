@@ -16,7 +16,7 @@ async def set_learning_goal(update: Update, context:ContextTypes.DEFAULT_TYPE):
 
 async def match(update: Update, context:ContextTypes.DEFAULT_TYPE):
     #To implement
-    await context.bot.send_message(chat_id=update.effective_chat.id)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Starting the matching process...")
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token('6233481401:AAHrhtvZ9ivUdCS-jjiq2f6IeSusyg7ZKPI').build()
