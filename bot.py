@@ -16,6 +16,7 @@ cred_object = firebase_admin.credentials.Certificate(filename)
 default_app = firebase_admin.initialize_app(cred_object, {
 	'databaseURL': 'https://learningbuddies-f71a2-default-rtdb.asia-southeast1.firebasedatabase.app/'
 	})
+queue = []
 
 from firebase_admin import db
 
@@ -53,14 +54,6 @@ class PlanProgress:
         return PlanProgress(dict["uid"], dict["plan"], dict["progress"],
             dict["iscomplete"])
         
-#To add to database
-# usersRef = db.reference('users')
-# usersJSON = usersRef.get()
-#load users JSON to users dict
-# users = {}
-# for userJSON in usersJSON:
-#     users[userJSON] = User.fromJSON(json.loads(usersJSON[userJSON]))
-# num_users = 0
 plan_codes = ["learn-angular", "learn-react", "75-hard", "couch25k"]
 
 #HAVE TO execute before all other commands to register uid        
@@ -80,7 +73,46 @@ def send_welcome(message):
 #To implement matching algo
 @bot.message_handler(commands=['match'])
 def match(message):
-    bot.reply_to(message, "Starting the matching process...")
+    user_ref = db.reference('users/'+ str(message.chat.id))
+    user = user_ref.get()
+    print(user['partnerid'])
+    if user['partnerid'] != 'None':
+        bot.reply_to(message, "Sorry! You're already matched.")
+        return
+    plan = user['plan']
+    queue_ref = db.reference('queue')
+    queue = queue_ref.get()
+    if queue != None:
+        if str(message.chat.id) in list(queue.keys()):
+            bot.send_message(message.chat.id, "You're still being matched! Hold on...")
+            return
+        eligible_users = list(filter(lambda x: x['plan'] == plan, queue.values()))
+    if queue and eligible_users:
+        partner = eligible_users.pop(0)
+        user['partnerid'] = partner['id']
+        user_ref.set(user)
+        partner_ref = db.reference('users/' + partner['id'])
+        partner_obj = partner_ref.get()
+        partner_obj['partnerid'] = str(message.chat.id)
+        partner_ref.set(partner_obj)
+
+        #delete from db queue
+        delete_ref = db.reference("queue/" + partner["id"])
+        delete_ref.delete()
+        
+        thisuser = message.from_user.username
+        bot.send_message(message.chat.id, "You've been matched with @" + partner['username'] + "!")
+        bot.send_message(partner['id'], "You've been matched with @" + thisuser + "!")
+        return
+    teleuser = message.from_user.username
+    if queue == None:
+        queue = []
+    else:
+        queue = list(queue.values())
+    queue.append({'id': str(message.chat.id), 'plan': plan, 'username': teleuser})
+    res_dct = {queue[i]['id']: queue[i] for i in range(0, len(queue), 2)}
+    queue_ref.set(res_dct)
+    bot.reply_to(message, "I'll notify you once we find you a match. Starting the matching process...")
 
 
 @bot.message_handler(commands=['select-plan'])
