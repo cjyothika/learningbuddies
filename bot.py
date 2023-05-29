@@ -103,7 +103,13 @@ def view_progress(message):
     data = curr_ref.get()
     tasklist = data['plan-progress']
     #TASK: format tasklist
-    bot.send_message(message.chat.id, tasklist)
+    tlstring = ""
+    for idx, task in enumerate(tasklist):
+        emoji = " ❌"
+        if int(task[0]) == 1:
+            emoji = " ✅"
+        tlstring += str(idx) + ". " + task[1].strip("\n") +  emoji + "\n"
+    bot.send_message(message.chat.id, tlstring)
 
 @bot.message_handler(commands=['mark-task'])
 def mark_task(message):
