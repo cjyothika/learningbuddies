@@ -123,6 +123,11 @@ def plan_selector(message):
         curr_ref.set(plan_code)
         plan_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan_code)
         plan_ref.set({'plan-progress': PlanProgress.getprogress(), 'currtask': 0, 'iscomplete' : False})
+
+        # remove user from queue if they are in it
+        queue_ref = db.reference("queue/" + str(message.chat.id))
+        queue_ref.delete()
+
         bot.reply_to(message, plan_code + " is now your current plan.")
     else:
         bot.reply_to(message, "I'm sorry. We currently do not have that plan!")
@@ -135,7 +140,28 @@ def view_progress(message):
     data = curr_ref.get()
     tasklist = data['plan-progress']
     #TASK: format tasklist
-    tlstring = ""
+    tlstring = "Your progress: \n"
+    for idx, task in enumerate(tasklist):
+        emoji = " ❌"
+        if int(task[0]) == 1:
+            emoji = " ✅"
+        tlstring += str(idx) + ". " + task[1].strip("\n") +  emoji + "\n"
+    bot.send_message(message.chat.id, tlstring)
+
+@bot.message_handler(commands=['view-partner-progress'])
+def view_partner_progress(message):
+    user_ref = db.reference('users/'+ str(message.chat.id))
+    user = user_ref.get()
+    partner_id = user["partnerid"]
+    if partner_id == "None":
+        bot.send_message(message.chat.id, "You don't have a partner yet! Try /match to find one.")
+        return
+    plan = user["plan"]
+    curr_ref = db.reference('plan-progress/' + partner_id + "/" + plan)
+    data = curr_ref.get()
+    tasklist = data['plan-progress']
+    #TASK: format tasklist
+    tlstring = "Your partner's progress: \n"
     for idx, task in enumerate(tasklist):
         emoji = " ❌"
         if int(task[0]) == 1:
@@ -150,7 +176,7 @@ def mark_task(message):
     current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
     current_task = current_task_ref.get()
     task_no = int(message.text.split(" ")[1])
-    if task_no <= current_task:
+    if task_no <= current_task and (task_no == 0 or haspartnerfinishedprev(message.chat.id)):
         curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan + "/plan-progress")
         tasklist = curr_ref.get()
         tasklist[task_no][0] = '1 '
@@ -160,6 +186,22 @@ def mark_task(message):
         bot.reply_to(message, "I have marked this task as completed! Task: " + tasklist[task_no][1])
     else:
         bot.reply_to(message, "I'm sorry. I cannot mark this task. You have not done the previous tasks yet!")
+
+def haspartnerfinishedprev(user_id):
+    user_ref = db.reference('users/'+ str(user_id))
+    user = user_ref.get()
+    partner_id = user["partnerid"]
+    if partner_id == "None":
+        return True
+    user_ct_ref = db.reference('plan-progress/'+str(user_id)+"/"+user["plan"]+"/currtask")
+    partner_ct_ref = db.reference('plan-progress/'+str(partner_id)+"/"+user["plan"]+"/currtask")
+    user_ct = user_ct_ref.get()
+    partner_ct = partner_ct_ref.get()
+    if partner_ct + 1 == user_ct:
+        return True
+    bot.send_message(user_id, "Oh no! You're partner is lagging behind. You can only proceed after he catched up! Motivate them.")
+    bot.send_message(partner_id, "Your partner is ready to move on! Better catch up soon...")
+    return False
 
 @bot.message_handler(commands=["view-curr-task"])
 def view_curr_task(message):
