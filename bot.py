@@ -30,7 +30,29 @@ class User:
     def fromJSON(dict):
         return User(dict["id"], dict["plan"], dict["partnerid"])
 
-
+class PlanProgress:
+    def __init__(self, uid, plan, progress, currtask, iscomplete):
+        self.uid = uid
+        self.plan = plan
+        self.progress = ""
+        self.currtask = 0
+        self.iscomplete = False
+    def getprogress():
+        text_file = open('learn-angular.txt','r')
+        Lines = text_file.readlines()
+        line_arr = []
+        for line in Lines:
+            task = line.split("|")
+            line_arr.append(task)
+        text_file.close()
+        return line_arr
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+    def fromJSON(dict):
+        return PlanProgress(dict["uid"], dict["plan"], dict["progress"],
+            dict["iscomplete"])
+        
 #To add to database
 # usersRef = db.reference('users')
 # usersJSON = usersRef.get()
@@ -48,8 +70,12 @@ def send_welcome(message):
     user_id = message.chat.id
     # users[user_id] = User(user_id, None)
     # user_obj = users[user_id].toJSON()
-    new_ref = db.reference('users/' + str(user_id))
-    new_ref.set(json.dumps({'plan' :  None, 'partnerid' : None}))
+    new_ref = db.reference('users')
+    new_ref.set({
+    user_id : {
+        'plan': 'None',
+        'partnerid': 'None'
+    }})
 
 #To implement matching algo
 @bot.message_handler(commands=['match'])
@@ -61,16 +87,27 @@ def match(message):
 def plan_selector(message):
     plan_code = message.text.split(" ")[1]
     if plan_code in plan_codes:
-        # users[message.chat.id].plan = plan_code
         curr_ref = db.reference('users/'+str(message.chat.id)+'/plan')
         curr_ref.set(plan_code)
+        plan_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan_code)
+        plan_ref.set({'plan-progress': PlanProgress.getprogress(), 'currtask': 0, 'iscomplete' : False})
         bot.reply_to(message, plan_code + " is now your current plan.")
     else:
         bot.reply_to(message, "I'm sorry. We currently do not have that plan!")
 
-@bot.message_handler()
+@bot.message_handler(commands=['view-progress'])
 def view_progress(message):
-    return
+    user_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
+    plan = user_ref.get()
+    curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan)
+    data = curr_ref.get()
+    tasklist = data['plan-progress']
+    bot.send_message(message.chat.id, tasklist)
+
+@bot.message_handler(commands=['mark-task'])
+def mark_task(message):
+    task_no = message.text.split(" ")[1]
+    curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/plan-progress")
 
 @bot.message_handler(commands=['help'])
 def help(message):
