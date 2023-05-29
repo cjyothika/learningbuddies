@@ -61,21 +61,20 @@ plan_codes = ["learn-angular", "learn-react", "75-hard", "couch25k"]
 def send_welcome(message):
     bot.reply_to(message, "Welcome to learningbuddies!")
     user_id = message.chat.id
-    # users[user_id] = User(user_id, None)
-    # user_obj = users[user_id].toJSON()
-    new_ref = db.reference('users')
+    new_ref = db.reference('users/' + str(message.chat.id))
     new_ref.set({
-    user_id : {
         'plan': 'None',
         'partnerid': 'None'
-    }})
+    })
 
 #To implement matching algo
 @bot.message_handler(commands=['match'])
 def match(message):
     user_ref = db.reference('users/'+ str(message.chat.id))
     user = user_ref.get()
-    print(user['partnerid'])
+    if user["plan"] == "None":
+        bot.send_message(message.chat.id, "Please select a plan before matching!")
+        return
     if user['partnerid'] != 'None':
         bot.reply_to(message, "Sorry! You're already matched.")
         return
@@ -110,7 +109,8 @@ def match(message):
     else:
         queue = list(queue.values())
     queue.append({'id': str(message.chat.id), 'plan': plan, 'username': teleuser})
-    res_dct = {queue[i]['id']: queue[i] for i in range(0, len(queue), 2)}
+    res_dct = {queue[i]['id']: queue[i] for i in range(0, len(queue))}
+    print(teleuser)
     queue_ref.set(res_dct)
     bot.reply_to(message, "I'll notify you once we find you a match. Starting the matching process...")
 
@@ -128,6 +128,10 @@ def plan_selector(message):
         queue_ref = db.reference("queue/" + str(message.chat.id))
         queue_ref.delete()
 
+        #remove partnerid
+        partnerid_ref = db.reference('users/'+str(message.chat.id)+'/partnerid')
+        partnerid_ref.set('None')
+
         bot.reply_to(message, plan_code + " is now your current plan.")
     else:
         bot.reply_to(message, "I'm sorry. We currently do not have that plan!")
@@ -136,6 +140,9 @@ def plan_selector(message):
 def view_progress(message):
     user_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = user_ref.get()
+    if plan == "None":
+        bot.send_message(message.chat.id, "Please select a plan before matching!")
+        return
     curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan)
     data = curr_ref.get()
     tasklist = data['plan-progress']
@@ -152,6 +159,9 @@ def view_progress(message):
 def view_partner_progress(message):
     user_ref = db.reference('users/'+ str(message.chat.id))
     user = user_ref.get()
+    if user["plan"] == "None":
+        bot.send_message(message.chat.id, "Please select a plan before matching!")
+        return
     partner_id = user["partnerid"]
     if partner_id == "None":
         bot.send_message(message.chat.id, "You don't have a partner yet! Try /match to find one.")
@@ -173,6 +183,9 @@ def view_partner_progress(message):
 def mark_task(message):
     plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = plan_ref.get()
+    if plan == "None":
+        bot.send_message(message.chat.id, "Please select a plan before matching!")
+        return
     current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
     current_task = current_task_ref.get()
     task_no = int(message.text.split(" ")[1])
@@ -207,6 +220,10 @@ def haspartnerfinishedprev(user_id):
 def view_curr_task(message):
     plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = plan_ref.get()
+    print(plan)
+    if plan == "None":
+        bot.send_message(message.chat.id, "Please select a plan before matching!")
+        return
     current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
     current_task = current_task_ref.get()
     curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan + "/plan-progress")
