@@ -13,49 +13,57 @@ import firebase_admin
 dir = os.path.dirname(__file__)
 filename = os.path.join(dir,'servicekey.json' )
 cred_object = firebase_admin.credentials.Certificate(filename)
-print(cred_object)
 default_app = firebase_admin.initialize_app(cred_object, {
 	'databaseURL': 'https://learningbuddies-f71a2-default-rtdb.asia-southeast1.firebasedatabase.app/'
 	})
 
 from firebase_admin import db
 
-#To add to database
-usersRef = db.reference('users')
-users = {}
-num_users = 0
-plan_codes = ["learn-angular", "learn-react", "75-hard", "couch25k"]
-
 class User:
-    def __init__(self, id, plans):
+    def __init__(self, id, plan, partnerid):
         self.id = id
         self.plan = None
+        self.partnerid = None
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
+    def fromJSON(dict):
+        return User(dict["id"], dict["plan"], dict["partnerid"])
+
+
+#To add to database
+# usersRef = db.reference('users')
+# usersJSON = usersRef.get()
+#load users JSON to users dict
+# users = {}
+# for userJSON in usersJSON:
+#     users[userJSON] = User.fromJSON(json.loads(usersJSON[userJSON]))
+# num_users = 0
+plan_codes = ["learn-angular", "learn-react", "75-hard", "couch25k"]
 
 #HAVE TO execute before all other commands to register uid        
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome to learningbuddies!")
     user_id = message.chat.id
-    users[user_id] = User(user_id, None)
-    user_obj = users[user_id].toJSON()
+    # users[user_id] = User(user_id, None)
+    # user_obj = users[user_id].toJSON()
     new_ref = db.reference('users/' + str(user_id))
-    new_ref.set(user_obj)
+    new_ref.set(json.dumps({'plan' :  None, 'partnerid' : None}))
 
 #To implement matching algo
 @bot.message_handler(commands=['match'])
 def match(message):
     bot.reply_to(message, "Starting the matching process...")
 
+
 @bot.message_handler(commands=['select-plan'])
 def plan_selector(message):
     plan_code = message.text.split(" ")[1]
     if plan_code in plan_codes:
-        users[message.chat.id].plan = plan_code
-        curr_ref = db.reference('users/'+str(message.chat.id))
-        curr_ref.set(users[message.chat.id].toJSON())
+        # users[message.chat.id].plan = plan_code
+        curr_ref = db.reference('users/'+str(message.chat.id)+'/plan')
+        curr_ref.set(plan_code)
         bot.reply_to(message, plan_code + " is now your current plan.")
     else:
         bot.reply_to(message, "I'm sorry. We currently do not have that plan!")
