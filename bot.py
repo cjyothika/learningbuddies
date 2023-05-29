@@ -102,12 +102,36 @@ def view_progress(message):
     curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan)
     data = curr_ref.get()
     tasklist = data['plan-progress']
+    #TASK: format tasklist
     bot.send_message(message.chat.id, tasklist)
 
 @bot.message_handler(commands=['mark-task'])
 def mark_task(message):
-    task_no = message.text.split(" ")[1]
-    curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/plan-progress")
+    plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
+    plan = plan_ref.get()
+    current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
+    current_task = current_task_ref.get()
+    task_no = int(message.text.split(" ")[1])
+    if task_no <= current_task:
+        curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan + "/plan-progress")
+        tasklist = curr_ref.get()
+        tasklist[task_no][0] = '1 '
+        curr_ref.set(tasklist)
+        if task_no == current_task:
+            current_task_ref.set(task_no + 1)
+        bot.reply_to(message, "I have marked this task as completed! Task: " + tasklist[task_no][1])
+    else:
+        bot.reply_to(message, "I'm sorry. I cannot mark this task. You have not done the previous tasks yet!")
+
+@bot.message_handler(commands=["view-curr-task"])
+def view_curr_task(message):
+    plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
+    plan = plan_ref.get()
+    current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
+    current_task = current_task_ref.get()
+    curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan + "/plan-progress")
+    tasklist = curr_ref.get()
+    bot.reply_to(message, "Your current task: " + tasklist[current_task][1])
 
 @bot.message_handler(commands=['help'])
 def help(message):
