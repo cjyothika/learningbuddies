@@ -1,0 +1,25 @@
+$ Introduction to Angular:
+0 | What is Angular?
+0 | Why use Angular?
+0 | Setting up the development environment
+0 | Understanding the project structure
+0 | Creating components and templates
+$ Introduction to TypeScript
+0 | Basic data types and operators
+0 | Functions and classes
+$ Components and Templates:
+0 | Understanding components and templates
+0 | Creating and using components
+0 | Data binding and event binding
+$ Directives and Pipes:
+0 | Introduction to directives and pipes
+0 | Built-in directives and pipes
+0 | Creating custom directives and pipes
+$ Services and Dependency Injection:
+0 | Understanding services and dependency injection
+0 | Creating and using services
+0 | Injecting services into components
+$ Forms:
+0 | Introduction to forms
+0 | Template-driven forms
+0 | Reactive forms
