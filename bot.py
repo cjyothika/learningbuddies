@@ -115,9 +115,11 @@ def match(message):
     bot.reply_to(message, "I'll notify you once we find you a match. Starting the matching process...")
 
 
-@bot.message_handler(commands=['select-plan'])
+@bot.message_handler(commands=['select-plan', 'selectplan'])
 def plan_selector(message):
     plan_code = message.text.split(" ")[1]
+    if not plan_code:
+        bot.reply_to(message, "Please select a plan! Eg. /select-plan learn-angular")
     if plan_code in plan_codes:
         curr_ref = db.reference('users/'+str(message.chat.id)+'/plan')
         curr_ref.set(plan_code)
@@ -136,7 +138,7 @@ def plan_selector(message):
     else:
         bot.reply_to(message, "I'm sorry. We currently do not have that plan!")
 
-@bot.message_handler(commands=['view-progress'])
+@bot.message_handler(commands=['view-progress', 'viewprogress'])
 def view_progress(message):
     user_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = user_ref.get()
@@ -155,7 +157,7 @@ def view_progress(message):
         tlstring += str(idx) + ". " + task[1].strip("\n") +  emoji + "\n"
     bot.send_message(message.chat.id, tlstring)
 
-@bot.message_handler(commands=['view-partner-progress'])
+@bot.message_handler(commands=['view-partner-progress', 'viewpartnerprogress'])
 def view_partner_progress(message):
     user_ref = db.reference('users/'+ str(message.chat.id))
     user = user_ref.get()
@@ -179,8 +181,12 @@ def view_partner_progress(message):
         tlstring += str(idx) + ". " + task[1].strip("\n") +  emoji + "\n"
     bot.send_message(message.chat.id, tlstring)
 
-@bot.message_handler(commands=['mark-task'])
+@bot.message_handler(commands=['mark-task', 'marktask'])
 def mark_task(message):
+    print(message.text)
+    if message.text.strip() == "/mark-task" or message.text.strip() == "/marktask":
+        bot.reply_to(message, "Please select an index! Eg. /mark-task 0")
+        return
     plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = plan_ref.get()
     if plan == "None":
@@ -188,17 +194,24 @@ def mark_task(message):
         return
     current_task_ref = db.reference('plan-progress/'+ str(message.chat.id) + '/' + plan + '/currtask')
     current_task = current_task_ref.get()
-    task_no = int(message.text.split(" ")[1])
+    try: 
+        task_no = int(message.text.split(" ")[1])
+    except ValueError:
+        bot.reply_to(message, "Please input a number as the index!")
+        return
     if task_no <= current_task and (task_no == 0 or haspartnerfinishedprev(message.chat.id)):
         curr_ref = db.reference('plan-progress/' + str(message.chat.id) + "/" + plan + "/plan-progress")
         tasklist = curr_ref.get()
+        if len(tasklist) == task_no:
+            bot.reply_to(message, "You have already finished this plan! You may select another plan with the /select-plan command.")
+            return
         tasklist[task_no][0] = '1 '
         curr_ref.set(tasklist)
         if task_no == current_task:
             current_task_ref.set(task_no + 1)
         bot.reply_to(message, "I have marked this task as completed! Task: " + tasklist[task_no][1])
     else:
-        bot.reply_to(message, "I'm sorry. I cannot mark this task. You have not done the previous tasks yet!")
+        bot.reply_to(message, "I'm sorry. I cannot mark this task. You or your partner have not done the previous tasks yet!")
 
 def haspartnerfinishedprev(user_id):
     user_ref = db.reference('users/'+ str(user_id))
@@ -216,7 +229,7 @@ def haspartnerfinishedprev(user_id):
     bot.send_message(partner_id, "Your partner is ready to move on! Better catch up soon...")
     return False
 
-@bot.message_handler(commands=["view-curr-task"])
+@bot.message_handler(commands=["view-curr-task", 'viewcurrtask'])
 def view_curr_task(message):
     plan_ref = db.reference('users/'+ str(message.chat.id) + '/plan')
     plan = plan_ref.get()
@@ -232,7 +245,7 @@ def view_curr_task(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    bot.reply_to(message, "Help Message")
+    bot.reply_to(message, "Go to github.com/cjyothika/learningbuddies for a guide.")
 
 # default handler for every other text
 @bot.message_handler(func=lambda message: True, content_types=['text'])
