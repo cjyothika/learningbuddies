@@ -11,7 +11,7 @@ Demo link: https://youtu.be/ZX3HRJbeTJI
 ## Set-up
 Clone this repository and run the following commands before trying out the bot! Keep the program running to use the bot. Note: Only Telegram users with a username can use this bot.
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 python bot.py
 ```
 ## /start
