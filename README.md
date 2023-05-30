@@ -14,6 +14,8 @@ Clone this repository  with `git clone https://github.com/cjyothika/learningbudd
 pip install -r requirements.txt
 python bot.py
 ```
+# Command glossary/guide: 
+
 ## /start
 Starts the telegram bot and registers you as a user.
 
