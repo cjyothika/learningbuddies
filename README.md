@@ -20,7 +20,8 @@ python bot.py
 Starts the telegram bot and registers you as a user.
 
 ## /select-plan {plan-code} or /selectplan {plan-code}
-Eg. /select-plan learn-angular will load an angular study plan for you.
+Eg. /select-plan learn-angular will load an angular study plan for you. You need to pick a plan to be able to execute the rest of the commands in this section.
+**Note: This will also reset your match or remove you from the matching queue if you want to find a new partner or plan!**
 Available plan-codes: learn-angular, learn-react, 75-hard, couch25k
 
 ## /match
