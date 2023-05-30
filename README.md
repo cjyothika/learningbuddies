@@ -9,7 +9,7 @@ Demo link: https://youtu.be/ZX3HRJbeTJI
 <img width="503" alt="Screenshot 2023-05-30 at 11 01 53 AM" src="https://github.com/cjyothika/learningbuddies/assets/59786385/94d59296-852e-497f-9f9f-90e8b3520179">
 
 ## Set-up
-Clone this repository and run the following commands before trying out the bot! Keep the program running to use the bot. Note: Only Telegram users with a username can use this bot.
+Clone this repository  with `git clone https://github.com/cjyothika/learningbuddies.git` in a directory of your choice and run the following commands in that directory before trying out the bot! Keep the program running to use the bot. Note: Only Telegram users with a username can use this bot.
 ```
 pip install -r requirements.txt
 python bot.py
