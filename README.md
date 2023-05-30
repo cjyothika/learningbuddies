@@ -1,11 +1,10 @@
 # learningbuddies
 
-learningbuddies is a Telegram bot(@learningbuddies_bot) that matches you with a likeminded individual to keep you accountable for your progress towards your goals. 
+Made for LifeHack 2023, learningbuddies is a Telegram bot(@learningbuddies_bot) that matches you with a likeminded individual to keep you accountable for your progress towards your goals. 
 Pick a plan and get matched with a partner. Chat with your partner and get each other motivated. Tick off tasks but you can only tick off the next
 task after your partner has finished their current task. You no longer have to learn skills in isolation! Having someone on the same journey as
 you can be rewarding.
 Demo link: https://youtu.be/ZX3HRJbeTJI
-Made for LifeHack 2023
 
 <img width="503" alt="Screenshot 2023-05-30 at 11 01 53 AM" src="https://github.com/cjyothika/learningbuddies/assets/59786385/94d59296-852e-497f-9f9f-90e8b3520179">
 
