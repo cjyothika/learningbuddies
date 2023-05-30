@@ -5,6 +5,13 @@ Pick a plan and get matched with a partner. Chat with your partner and get each 
 task after your partner has finished their current task. You no longer have to learn skills in isolation! Having someone on the same journey as
 you can be rewarding.
 
+## Set-up
+Clone this repository and run the following commands before trying out the bot! Keep the program running to use the bot.
+```
+pip install requirements.txt
+python bot.py
+```
+
 ## /start
 Starts the telegram bot and registers you as a user.
 
