@@ -7,7 +7,7 @@ bot = telebot.TeleBot("6233481401:AAHrhtvZ9ivUdCS-jjiq2f6IeSusyg7ZKPI")
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
-#link to firestore
+#link to firebase
 import firebase_admin
 
 dir = os.path.dirname(__file__)
